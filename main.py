@@ -73,6 +73,13 @@ class Tetromino:
         self.rotation = (self.rotation + 1) % len(self.shape_variants)
 
 
+# Ստվերի դիրքի որոշում
+def get_ghost_position():
+    ghost_pos = current_pos[:]
+    while not check_collision([ghost_pos[0] + 1, ghost_pos[1]], current_piece.get_shape()):
+        ghost_pos[0] += 1
+    return ghost_pos
+
 def draw_board():
     screen.fill(WHITE)
 
@@ -82,17 +89,20 @@ def draw_board():
     for row in range(ROWS):
         for col in range(COLUMNS):
             if board[row][col]:
-                pygame.draw.rect(
-                    screen,
-                    board[row][col],
-                    (
-                        col * GRID_SIZE,
-                        row * GRID_SIZE,
-                        GRID_SIZE,
-                        GRID_SIZE
-                    )
-                )
+                pygame.draw.rect(screen, board[row][col], (col * GRID_SIZE, row * GRID_SIZE, GRID_SIZE, GRID_SIZE))
+   
+    # Ստվերի պատկերում
+    if current_piece:
+        ghost_pos = get_ghost_position()
+        shape = current_piece.get_shape()
+        for row in range(len(shape)):
+            for col in range(len(shape[row])):
+                if shape[row][col]:
+                    x = ghost_pos[1] + col
+                    y = ghost_pos[0] + row
+                    pygame.draw.rect(screen, (128, 128, 128, 100), (x * GRID_SIZE, y * GRID_SIZE, GRID_SIZE, GRID_SIZE), 1)
 
+    # Պատկերի պատկերում
     if current_piece:
         shape = current_piece.get_shape()
         for row in range(len(shape)):
@@ -100,18 +110,7 @@ def draw_board():
                 if shape[row][col]:
                     x = current_pos[1] + col
                     y = current_pos[0] + row
-                    if 0 <= y < ROWS and 0 <= x < COLUMNS:
-                        pygame.draw.rect(
-                            screen,
-                            current_piece.color,
-                            (
-                                x * GRID_SIZE,
-                                y * GRID_SIZE,
-                                GRID_SIZE,
-                                GRID_SIZE,
-                            )
-                        )
-
+                    pygame.draw.rect(screen, current_piece.color, (x * GRID_SIZE, y * GRID_SIZE, GRID_SIZE, GRID_SIZE))
 
 def check_collision(pos, shape):
     for row in range(len(shape)):
